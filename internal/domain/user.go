@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type User struct {
 	ID             int64     `db:"id"`
@@ -9,4 +12,11 @@ type User struct {
 	TelegramChatID *int64    `db:"telegram_chat_id"`
 	CreatedAt      time.Time `db:"created_at"`
 	UpdatedAt      time.Time `db:"updated_at"`
+}
+
+type UserRepo interface {
+	CreateWithEmail(ctx context.Context, email, passwordHash string) (*User, error)
+	AttachEmail(ctx context.Context, userID int64, email, passwordHash string) (*User, error)
+	CreateWithTelegram(ctx context.Context, chatID int64) (*User, error)
+	LinkTelegram(ctx context.Context, userID, chatID int64) (*User, error)
 }
