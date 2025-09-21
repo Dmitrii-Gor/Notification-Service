@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"github.com/joho/godotenv"
 	"time"
 
 	"github.com/Dmitrii-Gor/notification-bot/internal/api"
@@ -16,6 +17,7 @@ import (
 const httpAddr = ":8080"
 
 func main() {
+	_ = godotenv.Load()
 	cfg := config.Load()
 
 	logger.InitLogger(cfg.Environment)
