@@ -2,7 +2,12 @@ package domain
 
 import (
 	"context"
+	"errors"
 	"time"
+)
+
+var (
+	ErrEmailAlreadyExists = errors.New("email already exists")
 )
 
 type User struct {
