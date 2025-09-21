@@ -3,8 +3,9 @@ module github.com/Dmitrii-Gor/notification-bot
 go 1.24.0
 
 require (
-	github.com/gin-gonic/gin v1.10.1
-	go.uber.org/zap v1.27.0
+        github.com/gin-gonic/gin v1.10.1
+        github.com/lib/pq v1.10.9
+        go.uber.org/zap v1.27.0
 )
 
 require (

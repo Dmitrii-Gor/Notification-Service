@@ -8,9 +8,10 @@ var log *zap.Logger
 
 func InitLogger(env string) {
 	var err error
-	if env == "dev" {
+	switch env {
+	case "dev", "development":
 		log, err = zap.NewDevelopment()
-	} else {
+	default:
 		log, err = zap.NewProduction()
 	}
 	if err != nil {
