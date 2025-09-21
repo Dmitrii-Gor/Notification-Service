@@ -55,8 +55,9 @@ func getDurationEnv(key string, defaultValue time.Duration) time.Duration {
 	if value := os.Getenv(key); value != "" {
 		if parsed, err := time.ParseDuration(value); err == nil {
 			return parsed
+		} else {
+			log.Printf("invalid duration for %s: %v, using default %s", key, err, defaultValue)
 		}
-		log.Printf("invalid duration for %s: %v, using default %s", key, err, defaultValue)
 	}
 
 	return defaultValue

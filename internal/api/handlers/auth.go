@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"github.com/Dmitrii-Gor/notification-bot/pkg/logger"
 	"net/http"
 	"time"
 
@@ -16,7 +17,6 @@ import (
 
 type AuthHandler struct {
 	users      domain.UserRepo
-	logger     *zap.Logger
 	jwtSecret  []byte
 	accessTTL  time.Duration
 	refreshTTL time.Duration
@@ -25,14 +25,12 @@ type AuthHandler struct {
 
 func NewAuthHandler(
 	users domain.UserRepo,
-	logger *zap.Logger,
 	jwtSecret []byte,
 	accessTTL, refreshTTL time.Duration,
 	dbTimeout time.Duration,
 ) *AuthHandler {
 	return &AuthHandler{
 		users:      users,
-		logger:     logger,
 		jwtSecret:  jwtSecret,
 		accessTTL:  accessTTL,
 		refreshTTL: refreshTTL,
@@ -62,7 +60,7 @@ func (h *AuthHandler) RegisterWithEmail(c *gin.Context) {
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		h.logger.Error("hash password", zap.Error(err))
+		logger.Error("hash password", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
 		return
 	}
@@ -73,7 +71,7 @@ func (h *AuthHandler) RegisterWithEmail(c *gin.Context) {
 		case errors.Is(err, domain.ErrEmailAlreadyExists):
 			c.JSON(http.StatusConflict, gin.H{"error": "email_in_use"})
 		default:
-			h.logger.Error("create user", zap.Error(err))
+			logger.Error("create user", zap.Error(err))
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
 		}
 		return
@@ -81,14 +79,14 @@ func (h *AuthHandler) RegisterWithEmail(c *gin.Context) {
 
 	access, err := h.buildToken(user, h.accessTTL)
 	if err != nil {
-		h.logger.Error("access token", zap.Error(err))
+		logger.Error("access token", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
 		return
 	}
 
 	refresh, err := h.buildToken(user, h.refreshTTL)
 	if err != nil {
-		h.logger.Error("refresh token", zap.Error(err))
+		logger.Error("refresh token", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
 		return
 	}
