@@ -8,6 +8,7 @@ import (
 
 var (
 	ErrEmailAlreadyExists = errors.New("email already exists")
+	UserNotFound          = errors.New("user not found")
 )
 
 type User struct {
@@ -24,4 +25,5 @@ type UserRepo interface {
 	AttachEmail(ctx context.Context, userID int64, email, passwordHash string) (*User, error)
 	CreateWithTelegram(ctx context.Context, chatID int64) (*User, error)
 	LinkTelegram(ctx context.Context, userID, chatID int64) (*User, error)
+	Delete(ctx context.Context, user *User) error
 }

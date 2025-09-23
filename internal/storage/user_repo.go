@@ -3,7 +3,9 @@ package storage
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/Dmitrii-Gor/notification-bot/internal/domain"
+	"github.com/lib/pq"
 )
 
 type UserRepo struct {
@@ -12,6 +14,23 @@ type UserRepo struct {
 
 func NewUserRepo(db *sql.DB) *UserRepo {
 	return &UserRepo{db: db}
+}
+
+func (r *UserRepo) Delete(ctx context.Context, user *domain.User) error {
+	result, err := r.db.ExecContext(ctx, `DELETE FROM users WHERE id=$1`, user.ID)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return domain.UserNotFound
+	}
+	return nil
 }
 
 func (r *UserRepo) CreateWithEmail(ctx context.Context, email string, passwordHash string) (*domain.User, error) {
@@ -24,6 +43,10 @@ func (r *UserRepo) CreateWithEmail(ctx context.Context, email string, passwordHa
 	).Scan(&user.ID, &user.Email, &user.PasswordHash, &user.TelegramChatID, &user.CreatedAt, &user.UpdatedAt)
 
 	if err != nil {
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) && pgErr.Code == pq.ErrorCode("23505") {
+			return nil, domain.ErrEmailAlreadyExists
+		}
 		return nil, err
 	}
 	return &user, nil
